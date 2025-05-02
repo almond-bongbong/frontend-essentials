@@ -1,0 +1,50 @@
+.container {
+  padding: 40px;
+}
+
+.title {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #1a1a1a;
+}
+
+.description {
+  margin-top: 10px;
+  color: #888;
+  line-height: 1.4;
+}
+
+.input {
+  display: block;
+  width: 100%;
+  margin-top: 20px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+
+  &:focus {
+    outline: none;
+    border-color: #007bff;
+  }
+}
+
+.button {
+  display: block;
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  left: 20px;
+  z-index: 1000;
+  height: 46px;
+  padding: 10px;
+  border-radius: 4px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:active {
+    background-color: #0056b3;
+  }
+}

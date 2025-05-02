@@ -12,6 +12,7 @@
 
 import { Route as rootRoute } from './routes/__root'
 import { Route as IndexImport } from './routes/index'
+import { Route as FixedCtaButtonIndexImport } from './routes/fixed-cta-button/index'
 import { Route as AboutIndexImport } from './routes/about/index'
 
 // Create/Update Routes
@@ -19,6 +20,12 @@ import { Route as AboutIndexImport } from './routes/about/index'
 const IndexRoute = IndexImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const FixedCtaButtonIndexRoute = FixedCtaButtonIndexImport.update({
+  id: '/fixed-cta-button/',
+  path: '/fixed-cta-button/',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -46,6 +53,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AboutIndexImport
       parentRoute: typeof rootRoute
     }
+    '/fixed-cta-button/': {
+      id: '/fixed-cta-button/'
+      path: '/fixed-cta-button'
+      fullPath: '/fixed-cta-button'
+      preLoaderRoute: typeof FixedCtaButtonIndexImport
+      parentRoute: typeof rootRoute
+    }
   }
 }
 
@@ -54,36 +68,41 @@ declare module '@tanstack/react-router' {
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutIndexRoute
+  '/fixed-cta-button': typeof FixedCtaButtonIndexRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutIndexRoute
+  '/fixed-cta-button': typeof FixedCtaButtonIndexRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
   '/about/': typeof AboutIndexRoute
+  '/fixed-cta-button/': typeof FixedCtaButtonIndexRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about'
+  fullPaths: '/' | '/about' | '/fixed-cta-button'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about'
-  id: '__root__' | '/' | '/about/'
+  to: '/' | '/about' | '/fixed-cta-button'
+  id: '__root__' | '/' | '/about/' | '/fixed-cta-button/'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutIndexRoute: typeof AboutIndexRoute
+  FixedCtaButtonIndexRoute: typeof FixedCtaButtonIndexRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutIndexRoute: AboutIndexRoute,
+  FixedCtaButtonIndexRoute: FixedCtaButtonIndexRoute,
 }
 
 export const routeTree = rootRoute
@@ -97,7 +116,8 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/about/"
+        "/about/",
+        "/fixed-cta-button/"
       ]
     },
     "/": {
@@ -105,6 +125,9 @@ export const routeTree = rootRoute
     },
     "/about/": {
       "filePath": "about/index.tsx"
+    },
+    "/fixed-cta-button/": {
+      "filePath": "fixed-cta-button/index.tsx"
     }
   }
 }

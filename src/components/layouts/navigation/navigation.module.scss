@@ -1,0 +1,35 @@
+.navigation {
+  margin-top: 50px;
+}
+
+.menu {
+  display: flex;
+  flex-direction: column;
+
+  & > li {
+    position: relative;
+    margin-left: 30px;
+
+    &:before {
+      content: '•';
+      position: absolute;
+      left: -26px;
+      top: 0;
+    }
+  }
+
+  a {
+    text-decoration: underline;
+  }
+}
+
+.title {
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.description {
+  margin-top: 4px;
+  font-size: 1rem;
+  color: #666;
+}
