@@ -33,3 +33,9 @@
   font-size: 1rem;
   color: #666;
 }
+
+@media (max-width: 768px) {
+  .navigation {
+    margin-top: 30px;
+  }
+}

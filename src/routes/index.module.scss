@@ -1,5 +1,5 @@
 .container {
-  padding: 50px;
+  padding: 40px;
 }
 
 .title {
@@ -12,4 +12,10 @@
   margin-top: 10px;
   font-size: 1.2rem;
   color: #888;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 20px;
+  }  
 }
