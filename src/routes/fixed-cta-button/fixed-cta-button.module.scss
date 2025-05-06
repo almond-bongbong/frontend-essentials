@@ -1,5 +1,5 @@
 .container {
-  padding: 40px;
+  padding: 26px 26px 100px;
 }
 
 .title {
@@ -28,13 +28,17 @@
   }
 }
 
-.button {
-  display: block;
+.cta {
   position: fixed;
   right: 20px;
-  bottom: 20px;
+  bottom: calc(env(safe-area-inset-bottom) + var(--kb-offset) + 20px);
   left: 20px;
   z-index: 1000;
+}
+
+.button {
+  display: block;
+  width: 100%;
   height: 46px;
   padding: 10px;
   border-radius: 4px;
@@ -47,4 +51,15 @@
   &:active {
     background-color: #0056b3;
   }
+}
+
+.link {
+  display: inline-block;
+  margin-top: 20px;
+  color: #007bff;
+  text-decoration: underline;
+}
+
+.long_content {
+  margin-top: 20px;
 }
