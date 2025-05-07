@@ -1,54 +1,61 @@
-# React + TypeScript + Vite
+# Frontend Lab
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+프론트엔드 개발 실험실 프로젝트입니다. 이 프로젝트는 최신 웹 개발 트렌드와 기술을 실험하고 학습하기 위한 공간입니다.
 
-Currently, two official plugins are available:
+## URL
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+https://almond-bongbong.github.io/frontend-lab/
 
-## Expanding the ESLint configuration
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 프로젝트 소개
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+이 프로젝트는 다음과 같은 목표를 가지고 있습니다:
+
+- React 19의 새로운 기능들을 실험하고 학습
+- TypeScript를 활용한 타입 안정성 확보
+- TanStack Router를 사용한 현대적인 라우팅 구현
+- 컴포넌트 기반 아키텍처 설계 및 구현
+- 최신 프론트엔드 개발 도구와 워크플로우 경험
+
+## 실험 기능
+
+- 하단 fixed CTA 버튼 
+
+## 기술 스택
+
+### 핵심 기술
+
+- React 19
+- TypeScript
+- TanStack Router
+
+### 개발 도구
+
+- Vite (빌드 도구)
+- ESLint (코드 품질)
+- Prettier (코드 포맷팅)
+- SASS (스타일링)
+
+## 시작하기
+
+### 필수 조건
+
+- Node.js (최신 LTS 버전 권장)
+- npm 또는 yarn
+
+### 설치 및 실행
+
+```bash
+# 의존성 설치
+npm install
+
+# 개발 서버 실행
+npm run dev
+
+# 프로덕션 빌드
+npm run build
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 라이선스
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
-```
+MIT
