@@ -1,8 +1,10 @@
 {
-  "name": "front-lab",
+  "name": "frontend-lab",
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "license": "MIT",
+  "homepage": "https://github.com/almond-bongbong/frontend-lab",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
