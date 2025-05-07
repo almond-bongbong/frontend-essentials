@@ -18,8 +18,7 @@ https://almond-bongbong.github.io/frontend-lab/
 
 ## 실험 기능
 
-- iOS 모바일 키패드 활성화시 하단 Fixed CTA 버튼 위치 조정 처리
-
+- iOS 모바일 키패드 활성화시 하단 Fixed CTA 버튼 위치 조정
 
 ## 기술 스택
 
