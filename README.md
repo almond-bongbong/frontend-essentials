@@ -6,7 +6,6 @@
 
 https://almond-bongbong.github.io/frontend-lab/
 
-
 ## 프로젝트 소개
 
 이 프로젝트는 다음과 같은 목표를 가지고 있습니다:
@@ -19,7 +18,8 @@ https://almond-bongbong.github.io/frontend-lab/
 
 ## 실험 기능
 
-- 하단 fixed CTA 버튼 
+- iOS 모바일 키패드 활성화시 하단 Fixed CTA 버튼 위치 조정 처리
+
 
 ## 기술 스택
 
