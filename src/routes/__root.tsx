@@ -1,5 +1,4 @@
 import { createRootRoute, Outlet } from '@tanstack/react-router';
-import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 import './styles.scss';
 
 export const Route = createRootRoute({
@@ -7,7 +6,8 @@ export const Route = createRootRoute({
     <div>
       <Outlet />
 
-      <TanStackRouterDevtools />
+      {/* tanstack router 디버깅용 툴 */}
+      {/* <TanStackRouterDevtools /> */}
     </div>
   ),
 });

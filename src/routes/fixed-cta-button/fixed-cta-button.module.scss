@@ -31,9 +31,11 @@
 .cta {
   position: fixed;
   right: 20px;
-  bottom: calc(env(safe-area-inset-bottom) + var(--kb-offset) + 20px);
+  bottom: 0;
   left: 20px;
   z-index: 1000;
+  will-change: transform; 
+  transform: translateY(calc(var(--kb-offset, 0px) - 20px));
 }
 
 .button {
@@ -62,4 +64,17 @@
 
 .long_content {
   margin-top: 20px;
+}
+
+.info {
+  position: absolute;
+  top: -10px;
+  left: 0;
+  right: 0;
+  padding: 5px 10px;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  white-space: pre-line;
+  font-size: 12px;
+  transform: translateY(-100%); 
 }
