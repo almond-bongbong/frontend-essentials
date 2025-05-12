@@ -86,15 +86,21 @@ function FixedCTAButton() {
       setKeyboardOffset(
         `
          bottom: ${window.innerHeight} - (${visualViewport.height} + ${realOffsetTop}) = ${bottomPosition}
-         window.innerHeight: ${window.innerHeight}
+         * clientHeight: ${document.documentElement.clientHeight}
+         * window.innerHeight: ${window.innerHeight}
+         window.outerHeight: ${window.outerHeight}
          visualViewport.height: ${visualViewport.height}
          visualViewport.offsetTop: ${visualViewport.offsetTop}
+         * vv.height + vv.offsetTop: ${visualViewport.height + visualViewport.offsetTop}
          scrollY: ${scrollY}
          scrollHeight: ${document.documentElement.scrollHeight}
+         clientHeight + scrollY: ${document.documentElement.clientHeight + scrollY} 
          innerHeight + scrollY: ${window.innerHeight + scrollY}
          vv.height + scrollY: ${visualViewport.height + scrollY}
+         vv.top(offsetTop): ${topGap}
+         vv.bottom(window.innerHeight - vv.height): ${bottomGap}
          viewportGap: ${topGap + bottomGap}
-         scroll gap(bottom): ${document.documentElement.scrollHeight - (window.innerHeight + scrollY)}  
+         scroll gap: ${document.documentElement.scrollHeight - (window.innerHeight + scrollY)}  
         `.trim(),
       );
 
