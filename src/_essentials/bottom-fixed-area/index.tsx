@@ -142,8 +142,8 @@ function BottomFixedArea({ children, className }: Props) {
       if (keyboardVisibleDelayTimer) clearTimeout(keyboardVisibleDelayTimer);
     };
 
-    window.addEventListener('focusin', focusinHandler);
-    window.addEventListener('focusout', focusoutHandler);
+    window.addEventListener('focusin', focusinHandler, { passive: true });
+    window.addEventListener('focusout', focusoutHandler, { passive: true });
 
     // ────────────── Fade-out on gestures ──────────────
     // While typing, users often drag/scroll to peek at content obscured by the
@@ -180,8 +180,8 @@ function BottomFixedArea({ children, className }: Props) {
       timer = setTimeout(() => setIsHide(false), 200);
     };
 
-    window.addEventListener('touchstart', handleTouchStart);
-    window.addEventListener('touchend', handleTouchEnd);
+    window.addEventListener('touchstart', handleTouchStart, { passive: true });
+    window.addEventListener('touchend', handleTouchEnd, { passive: true });
     window.addEventListener('scroll', handleScroll, { passive: true });
 
     // ────────────── House-keeping ──────────────
