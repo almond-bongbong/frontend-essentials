@@ -28,16 +28,6 @@
   }
 }
 
-.cta {
-  position: fixed;
-  right: 20px;
-  bottom: 0;
-  left: 20px;
-  z-index: 1000;
-  will-change: transform; 
-  transform: translateY(calc(var(--kb-offset, 0px) - 20px));
-}
-
 .button {
   display: block;
   width: 100%;
