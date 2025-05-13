@@ -82,7 +82,7 @@ function FixedCTAButton() {
         </div>
       )}
 
-      <BottomFixedArea>
+      <BottomFixedArea className={styles.cta}>
         <button type="button" className={styles.button} onClick={() => alert('submit')}>
           Submit
         </button>

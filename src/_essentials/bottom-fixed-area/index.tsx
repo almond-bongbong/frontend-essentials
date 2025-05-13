@@ -1,20 +1,45 @@
+/**
+ * BottomFixedArea
+ * ---------------
+ * Keeps its children (typically a Call-To-Action button) visually pinned to the
+ * bottom of the screen even while the on-screen keyboard is animating in or out.
+ *
+ * Rationale
+ * ---------
+ * Mobile browsers shrink the `visualViewport` when the virtual keyboard appears,
+ * while `document.documentElement.clientHeight` stays constant. We listen to
+ * `visualViewport.resize` / `scroll` and write the keyboard height into a CSS
+ * custom property so the CTA can move with a cheap GPU transform.
+ *
+ * Edge cases covered
+ * ------------------
+ * • Page may or may not have a scrollbar before the keyboard.
+ * • Safari URL-bar collapse introduces an extra “height gap”.
+ * • Browsers fire `focusin` before the keyboard is fully visible, so some
+ *   effects start after a 300 ms delay to avoid flicker.
+ *
+ * Written 2025-05-13 (KST) — keep for future maintainers 🙏
+ */
 import { ReactNode } from '@tanstack/react-router';
 import { useEffect, useRef, useState } from 'react';
 import styles from './bottom-fixed-area.module.scss';
 
 interface Props {
   children: ReactNode;
+  className?: string;
 }
 
-function BottomFixedArea({ children }: Props) {
-  // CTA 영역 ref
+function BottomFixedArea({ children, className }: Props) {
+  // DOM reference to the CTA container that we ultimately translate vertically
   const ctaRef = useRef<HTMLDivElement>(null);
 
-  // 스크롤시 영역 fade out을 위한 상태
+  // Local UI state: hides the CTA briefly while the user scrolls or drags
   const [isHide, setIsHide] = useState(false);
 
   /**
-   * 키보드 높이에 따라 CTA 버튼을 배치합니다.
+   * Subscribe to viewport / keyboard / gesture events and keep the CTA
+   * positioned exactly above the virtual keyboard.
+   * Also adds a subtle fade-out while the user scrolls for better UX.
    */
   useEffect(() => {
     const ctaElement = ctaRef.current;
@@ -24,50 +49,77 @@ function BottomFixedArea({ children }: Props) {
       return;
     }
 
+    // Runtime flags --------------------------------------------------------------
+    // * isKeyboardVisible — set to true on any focusin; resets on focusout.
+    // * isKeyboardVisibleWithDelay — same, but only after a 300 ms delay so we
+    //   know the keyboard finished its slide-in animation (prevents flicker).
+    // * hasScroll — snapshot taken on focusin; tells us whether the document
+    //   already had its own scrollbar *before* the keyboard showed up.
     let isKeyboardVisible = false;
     let isKeyboardVisibleWithDelay = false;
     let hasScroll = false;
 
+    /**
+     * placeCTA
+     * --------
+     * Writes the *negative* keyboard height into the `--kb-offset` custom
+     * property so the CTA slides upward by exactly that amount.
+     * Using `transform` offloads work to the GPU; 0 px restores original place.
+     */
     const placeCTA = (keyboardHeight = 0) => {
-      document.documentElement.style.setProperty('--kb-offset', `-${keyboardHeight}px`);
+      if (ctaRef.current) {
+        ctaRef.current.style.transform = `translateY(calc(-${keyboardHeight || 0}px))`;
+      }
     };
 
     /**
-     * 키보드 높이 계산 및 CTA 위치 조정
+     * Recalculate the virtual-keyboard height and reposition the CTA.
+     * Runs on every `visualViewport.resize` or `visualViewport.scroll`.
      */
     const viewportChangeHandler = () => {
       if (!visualViewport) return;
 
-      // 현재 스크롤 위치
+      // Current scrollY — relevant only when the page *was not* scrollable
+      // before the keyboard; browsers then auto-pan the page upward.
       const scrollY = window.scrollY;
 
-      // height gap (최소 0)
+      // Gap caused by Safari URL-bar collapse; clamp to ≥ 0 to avoid negatives
       const heightGap = Math.max(0, document.documentElement.clientHeight - window.innerHeight);
 
-      // 영역 bottom 위치
+      // Desired bottom position of the CTA ---------------------------------------
+      // if hasScroll === true  → document was scrollable pre-keyboard
+      //   visualViewport.offsetTop stays 0, but its height shrinks; subtract
+      //   heightGap so URL-bar collapse isn’t counted twice.
+      //
+      // if hasScroll === false → document started *non-scrollable* and browser
+      //   pans the page; visualViewport.offsetTop becomes positive, so we *add*
+      //   scrollY to cancel out that pan.
       const bottomPosition = hasScroll
         ? window.innerHeight - (visualViewport.height + visualViewport.offsetTop - heightGap)
         : window.innerHeight - (visualViewport.height + visualViewport.offsetTop) + scrollY;
 
+      // Don’t move CTA if keyboard isn’t visible yet
       if (!isKeyboardVisible) {
         return;
       }
 
-      // 키보드 높이 조정 (키보드 높이가 0이면 스크롤 위치를 더하지 않음)
+      // Apply new offset (0 px means keyboard closed)
       placeCTA(bottomPosition);
     };
 
+    // Subscribe with { passive:true } to avoid blocking scroll
     visualViewport?.addEventListener('resize', viewportChangeHandler, { passive: true });
     visualViewport?.addEventListener('scroll', viewportChangeHandler, { passive: true });
 
-    // 초기 키보드 높이 조정
+    // Initial placement
     viewportChangeHandler();
 
-    /**
-     * 키보드 열림/닫힘 상태 관리 이벤트
-     */
+    // Delay timer — makes sure keyboard animation fully settles before we treat
+    // it as “visible with delay”.
     let keyboardVisibleDelayTimer: number | null = null;
 
+    // ────────────── Focus Handlers ──────────────
+    // focusin = keyboard likely opening
     const focusinHandler = () => {
       hasScroll = document.documentElement.scrollHeight > window.innerHeight;
       isKeyboardVisible = true;
@@ -78,8 +130,11 @@ function BottomFixedArea({ children }: Props) {
         isKeyboardVisibleWithDelay = true;
       }, 300);
     };
+
+    // focusout = keyboard closing; restore CTA after one RAF to avoid racing
+    // with the viewport resize event.
     const focusoutHandler = () => {
-      // 즉시 높이가 조정되는 경우는 클릭,터치가 되지 않아 한프레임 뒤 높이 조정
+      // When the keyboard hides instantly (e.g. tapping non‑input areas) events can mix; defer the reset by one frame
       requestAnimationFrame(() => placeCTA(0));
 
       isKeyboardVisible = false;
@@ -90,43 +145,47 @@ function BottomFixedArea({ children }: Props) {
     window.addEventListener('focusin', focusinHandler);
     window.addEventListener('focusout', focusoutHandler);
 
-    /**
-     * 터치, 스크롤시 영역 fade out
-     */
+    // ────────────── Fade-out on gestures ──────────────
+    // While typing, users often drag/scroll to peek at content obscured by the
+    // keyboard.  We fade the CTA out during such gestures so it doesn’t block
+    // what the user is actively looking at.
     let timer: number | null = null;
     const handleTouchStart = (e: TouchEvent) => {
-      if (!isKeyboardVisibleWithDelay || !isKeyboardVisible) return;
+      if (!isKeyboardVisibleWithDelay) return;
       if (timer) clearTimeout(timer);
 
-      // CTA 영역 내부 element 터치시 hide 처리하지 않음
+      // Ignore taps *inside* the CTA → don’t hide when user wants to click it
       if (ctaRef.current?.contains(e.target as Node)) {
         return;
       }
 
+      // Start fade-out immediately on first movement frame
       setIsHide(true);
     };
+
     const handleTouchEnd = () => {
-      if (!isKeyboardVisibleWithDelay || !isKeyboardVisible) return;
+      if (!isKeyboardVisibleWithDelay) return;
       if (timer) clearTimeout(timer);
 
-      timer = setTimeout(() => {
-        setIsHide(false);
-      }, 300);
+      // Restore CTA after finger lifts (small delay prevents flicker)
+      timer = setTimeout(() => setIsHide(false), 300);
     };
+
     const handleScroll = () => {
-      if (!isKeyboardVisibleWithDelay || !isKeyboardVisible) return;
+      if (!isKeyboardVisibleWithDelay) return;
       if (timer) clearTimeout(timer);
 
+      // Continuous scroll → keep CTA hidden until scrolling pauses
       setIsHide(true);
-
-      timer = setTimeout(() => {
-        setIsHide(false);
-      }, 200);
+      timer = setTimeout(() => setIsHide(false), 200);
     };
+
     window.addEventListener('touchstart', handleTouchStart);
     window.addEventListener('touchend', handleTouchEnd);
     window.addEventListener('scroll', handleScroll, { passive: true });
 
+    // ────────────── House-keeping ──────────────
+    // Remove *all* listeners when component unmounts to prevent leaks.
     return () => {
       visualViewport?.removeEventListener('resize', viewportChangeHandler);
       visualViewport?.removeEventListener('scroll', viewportChangeHandler);
@@ -139,7 +198,12 @@ function BottomFixedArea({ children }: Props) {
   }, []);
 
   return (
-    <div ref={ctaRef} className={[styles.bottom_fixed_area, isHide && styles.hide].join(' ')}>
+    <div
+      ref={ctaRef}
+      className={[className, styles.bottom_fixed_area, isHide && styles.hide]
+        .filter(Boolean)
+        .join(' ')}
+    >
       {children}
     </div>
   );
