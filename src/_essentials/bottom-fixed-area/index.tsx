@@ -128,7 +128,7 @@ function BottomFixedArea({ children, className }: Props) {
 
       keyboardVisibleDelayTimer = setTimeout(() => {
         isKeyboardVisibleWithDelay = true;
-      }, 300);
+      }, 500);
     };
 
     // focusout = keyboard closing; restore CTA after one RAF to avoid racing
@@ -150,7 +150,11 @@ function BottomFixedArea({ children, className }: Props) {
     // keyboard.  We fade the CTA out during such gestures so it doesn’t block
     // what the user is actively looking at.
     let timer: number | null = null;
+    let isTouching = false;
+
     const handleTouchStart = (e: TouchEvent) => {
+      isTouching = true;
+
       if (!isKeyboardVisibleWithDelay) return;
       if (timer) clearTimeout(timer);
 
@@ -164,6 +168,8 @@ function BottomFixedArea({ children, className }: Props) {
     };
 
     const handleTouchEnd = () => {
+      isTouching = false;
+
       if (!isKeyboardVisibleWithDelay) return;
       if (timer) clearTimeout(timer);
 
@@ -177,6 +183,10 @@ function BottomFixedArea({ children, className }: Props) {
 
       // Continuous scroll → keep CTA hidden until scrolling pauses
       setIsHide(true);
+
+      // Ignore scroll events while touching the screen
+      if (isTouching) return;
+
       timer = setTimeout(() => setIsHide(false), 200);
     };
 
