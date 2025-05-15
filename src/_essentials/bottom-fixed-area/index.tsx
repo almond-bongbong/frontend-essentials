@@ -174,7 +174,7 @@ function BottomFixedArea({ children, className }: Props) {
       if (timer) clearTimeout(timer);
 
       // Restore CTA after finger lifts (small delay prevents flicker)
-      timer = setTimeout(() => setIsHide(false), 300);
+      timer = setTimeout(() => setIsHide(false), 100);
     };
 
     const handleScroll = () => {
