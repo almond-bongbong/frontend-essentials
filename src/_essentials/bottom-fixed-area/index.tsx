@@ -129,6 +129,9 @@ function BottomFixedArea({ children, className }: Props) {
       keyboardVisibleDelayTimer = setTimeout(() => {
         isKeyboardVisibleWithDelay = true;
       }, 500);
+
+      // Re-position the CTA immediately after the keyboard is opened
+      viewportChangeHandler();
     };
 
     // focusout = keyboard closing; restore CTA after one RAF to avoid racing
