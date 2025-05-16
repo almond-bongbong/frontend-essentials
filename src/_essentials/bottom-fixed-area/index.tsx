@@ -162,7 +162,8 @@ function BottomFixedArea({ children, className }: Props) {
       if (timer) clearTimeout(timer);
 
       // Ignore taps *inside* the CTA → don’t hide when user wants to click it
-      if (ctaRef.current?.contains(e.target as Node)) {
+      // Ignore taps on input elements → don’t hide when user wants to type
+      if (ctaRef.current?.contains(e.target as Node) || e.target instanceof HTMLInputElement) {
         return;
       }
 
