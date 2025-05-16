@@ -138,7 +138,7 @@ function BottomFixedArea({ children, className }: Props) {
     // with the viewport resize event.
     const focusoutHandler = () => {
       // When the keyboard hides instantly (e.g. tapping non‑input areas) events can mix; defer the reset by one frame
-      requestAnimationFrame(() => placeCTA(0));
+      setTimeout(() => placeCTA(0), 16);
 
       isKeyboardVisible = false;
       isKeyboardVisibleWithDelay = false;
