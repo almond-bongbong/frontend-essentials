@@ -1,24 +1,67 @@
 /**
  * BottomFixedArea
- * ---------------
- * Keeps its children (typically a Call-To-Action button) visually pinned to the
- * bottom of the screen even while the on-screen keyboard is animating in or out.
+ * =============================================================================
+ * PURPOSE
+ * -------
+ * Keeps its children (typically a Call‑To‑Action button) visually pinned to the
+ * **visible** bottom edge of the viewport on iOS Safari/Chrome *even while* the
+ * on‑screen keyboard is animating in or out.
  *
- * Rationale
- * ---------
- * Mobile browsers shrink the `visualViewport` when the virtual keyboard appears,
- * while `document.documentElement.clientHeight` stays constant. We listen to
- * `visualViewport.resize` / `scroll` and write the keyboard height into a CSS
- * custom property so the CTA can move with a cheap GPU transform.
+ * WHY THIS COMPONENT EXISTS
+ * -------------------------
+ * 1. Mobile Safari & Chrome on iOS break `position: fixed` whenever the virtual
+ *    keyboard appears. The `visualViewport` shrinks and the browser pans or
+ *    resizes the page, so `bottom: 0` no longer means “bottom”.
+ * 2. Android resolved this issue back in 2019; iOS has not, so we guard all
+ *    logic behind an `isIOS` check to avoid unnecessary work elsewhere.
+ * 3. Product and design teams love bottom‑aligned CTAs because they convert
+ *    well. Losing them under the keyboard is **not** acceptable.
  *
- * Edge cases covered
+ * HIGH‑LEVEL STRATEGY
+ * -------------------
+ * We keep the CTA in normal document flow and translate it vertically using
+ * `transform: translateY(...)`. The translation amount is simply the *negative*
+ * height of the virtual keyboard, derived from the `visualViewport` API.
+ *
+ *     ┌──────────────────────────────┐   visualViewport.height
+ *     │     (visible content)        │◄───────────────┐
+ *     │                              │                │ offsetTop
+ *     ├──────────────────────────────┤                │
+ *     │  ┌─────────────┐             │                │
+ *     │  │  keyboard   │             │◄───────────────┘ (CTA moves above this)
+ *     │  └─────────────┘             │
+ *     └──────────────────────────────┘
+ *
+ * KEY APIS & CONCEPTS
+ * -------------------
+ * • `window.visualViewport` — reveals the unobscured portion of the page.
+ * • `visualViewport.resize / scroll` — fire on *every frame* of the keyboard
+ *   animation, letting us sync the CTA in real‑time.
+ * • `focusin / focusout` — reliable way to know when the keyboard is entering
+ *   or leaving.
+ * • `transform` over `top/bottom` — avoids reflow; critical for low‑end iPhones.
+ *
+ * EDGE CASES HANDLED
  * ------------------
- * • Page may or may not have a scrollbar before the keyboard.
- * • Safari URL-bar collapse introduces an extra “height gap”.
- * • Browsers fire `focusin` before the keyboard is fully visible, so some
- *   effects start after a 300 ms delay to avoid flicker.
+ * • Page may or may not have its own scrollbar *before* the keyboard appears.
+ * • Safari URL‑bar collapse introduces a phantom “height gap”.
+ * • Browsers fire `focusin` **before** the keyboard is fully visible; we wait
+ *   300 ms to avoid flicker.
+ * • Users can scroll or drag while typing; we fade the CTA so it doesn’t block
+ *   what they are reading.
  *
- * Written 2025-05-13 (KST) — keep for future maintainers 🙏
+ * DEVELOPMENT & MAINTENANCE NOTES
+ * -------------------------------
+ * 1. Stick to GPU‑friendly `transform` properties; touching layout metrics
+ *    inside scroll handlers will stutter.
+ * 2. If a future iOS version fixes this quirk, delete the `useEffect` entirely
+ *    and the component degrades to a simple wrapper.
+ * 3. Do **not** polyfill `visualViewport`; the math below assumes native
+ *    behavior.
+ * 4. Performance budget: keep work under 1 RAF; handlers must stay light.
+ *
+ * LAST VERIFIED: iOS 18.0 (Safari 18, Chrome 127) — 2025‑05‑17 (KST)
+ * Author: frontend‑lab team — ping @cmlee before refactoring.
  */
 import { ReactNode } from '@tanstack/react-router';
 import { useEffect, useRef, useState } from 'react';
@@ -45,7 +88,10 @@ function BottomFixedArea({ children, className }: Props) {
     const ctaElement = ctaRef.current;
     const { visualViewport } = window;
 
-    if (!ctaElement || !visualViewport) {
+    // Check iOS device
+    const isIOS = /iPad|iPhone/.test(navigator.userAgent);
+
+    if (!ctaElement || !visualViewport || !isIOS) {
       return;
     }
 
@@ -73,8 +119,28 @@ function BottomFixedArea({ children, className }: Props) {
     };
 
     /**
-     * Recalculate the virtual-keyboard height and reposition the CTA.
-     * Runs on every `visualViewport.resize` or `visualViewport.scroll`.
+     * viewportChangeHandler
+     * ---------------------
+     * Runs on every `visualViewport.resize` **and** `visualViewport.scroll`
+     * event — effectively once per animation frame while the keyboard slides.
+     *
+     * Mental model
+     * ------------
+     * Case A — Document WAS scrollable before the keyboard:
+     *   • `visualViewport.offsetTop` stays 0
+     *   • viewport height shrinks
+     *   • We subtract the Safari URL‑bar gap (`heightGap`) to avoid double count
+     *
+     * Case B — Document was NOT scrollable:
+     *   • Browser pans the whole document upward
+     *   • `visualViewport.offsetTop` grows from 0 → keyboardHeight
+     *   • `scrollY` remains 0
+     *   • We have to *add* that pan back to the translation so the CTA tracks
+     *     the keyboard instead of the document.
+     *
+     * The resulting `bottomPosition` is the pixel amount we must translate the
+     * CTA **upwards** (positive number). When the keyboard is closed,
+     * bottomPosition collapses to 0 → translation becomes `translateY(0)`.
      */
     const viewportChangeHandler = () => {
       if (!visualViewport) return;
@@ -152,6 +218,28 @@ function BottomFixedArea({ children, className }: Props) {
     // While typing, users often drag/scroll to peek at content obscured by the
     // keyboard.  We fade the CTA out during such gestures so it doesn’t block
     // what the user is actively looking at.
+    /**
+     * UX: temporarily hide CTA while the user scrolls or drags
+     * --------------------------------------------------------
+     * Context
+     *   When typing, users often swipe up a bit to peek at content that sits
+     *   under the keyboard. A fixed CTA would block that exact area.
+     *
+     * Approach
+     *   • On any touchstart that occurs *outside* the CTA and any `<input/>`,
+     *     set `isHide = true` so the SCSS fades the button out (`opacity: 0`).
+     *   • On touchend we wait 100 ms; on scroll idle we wait 200 ms before
+     *     showing the CTA again to avoid flicker during small bounces.
+     *
+     * Why opacity instead of display/visibility?
+     *   Opacity keeps the element in the flow so the translateY math remains
+     *   intact; visibility or display would introduce layout jumps and lose
+     *   pointer events.
+     *
+     * Tuning knobs
+     *   Adjust the timeouts or switch to a CSS transition duration if design
+     *   wants a snappier or slower reveal.
+     */
     let timer: number | null = null;
     let isTouching = false;
 

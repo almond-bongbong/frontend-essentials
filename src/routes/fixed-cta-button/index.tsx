@@ -1,4 +1,4 @@
-import BottomFixedArea from '@/_essentials/bottom-fixed-area';
+import BottomFixedArea from '@/essentials/bottom-fixed-area';
 import { getLocalStorage, setLocalStorage } from '@/features/storage';
 import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
