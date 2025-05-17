@@ -63,8 +63,7 @@
  * LAST VERIFIED: iOS 18.0 (Safari 18, Chrome 127) — 2025‑05‑17 (KST)
  * Author: frontend‑lab team — ping @cmlee before refactoring.
  */
-import { ReactNode } from '@tanstack/react-router';
-import { useEffect, useRef, useState } from 'react';
+import { ReactNode, useEffect, useRef, useState } from 'react';
 import styles from './bottom-fixed-area.module.scss';
 
 interface Props {
@@ -89,7 +88,9 @@ function BottomFixedArea({ children, className }: Props) {
     const { visualViewport } = window;
 
     // Check iOS device
-    const isIOS = /iPad|iPhone/.test(navigator.userAgent);
+    const isIOS =
+      /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
     if (!ctaElement || !visualViewport || !isIOS) {
       return;
@@ -114,7 +115,7 @@ function BottomFixedArea({ children, className }: Props) {
      */
     const placeCTA = (keyboardHeight = 0) => {
       if (ctaRef.current) {
-        ctaRef.current.style.transform = `translateY(calc(-${keyboardHeight || 0}px))`;
+        ctaRef.current.style.transform = `translateY(-${keyboardHeight || 0}px)`;
       }
     };
 

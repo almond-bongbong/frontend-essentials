@@ -4,7 +4,7 @@ A repository that collects experiments and solutions for various edge cases and 
 
 ## URL
 
-https://almond-bongbong.github.io/frontend-essentials/
+[Frontend Essentials Demo](https://almond-bongbong.github.io/frontend-essentials/)
 
 ## Solved Challenges
 

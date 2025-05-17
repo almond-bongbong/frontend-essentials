@@ -5,6 +5,10 @@
   "type": "module",
   "license": "MIT",
   "homepage": "https://github.com/almond-bongbong/frontend-essentials",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/almond-bongbong/frontend-essentials.git"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
