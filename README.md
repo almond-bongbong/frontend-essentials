@@ -1,24 +1,39 @@
-# Frontend Lab
+# Frontend Essentials
 
-This is a frontend development laboratory project. This project serves as a space for experimenting with and learning about the latest web development trends and technologies.
+A repository that collects experiments and solutions for various edge cases and challenges encountered in frontend development.
 
 ## URL
 
-https://almond-bongbong.github.io/frontend-lab/
+[Frontend Essentials Demo](https://almond-bongbong.github.io/frontend-essentials/)
 
-## Project Overview
+## Solved Challenges
 
-This project has the following objectives:
+### 1. iOS Mobile Keyboard & Bottom Fixed CTA
 
-- Experiment with and learn new features of React 19
-- Ensure type safety using TypeScript
-- Implement modern routing with TanStack Router
-- Design and implement component-based architecture
-- Experience the latest frontend development tools and workflows
+**Problem**: On iOS Safari/Chrome, when the virtual keyboard appears, `position: fixed` elements break their positioning, causing bottom-aligned CTAs to disappear under the keyboard.
 
-## Experimental Features
+**Solution**:
 
-- Adjusting bottom Fixed CTA button position when iOS mobile keyboard is activated
+- Uses `visualViewport` API to track keyboard height in real-time
+- Implements smooth animation using `transform: translateY()`
+- Handles various edge cases:
+  - Safari URL-bar collapse
+  - Pre-existing page scroll
+  - Touch gestures during typing
+  - Keyboard animation timing
+
+**Location**: `/essentials/bottom-fixed-area`
+
+### 2. [Next Challenge]
+
+**Problem**: [Description of the problem]
+
+**Solution**:
+
+- [Key solution points]
+- [Edge cases handled]
+
+**Location**: `/essentials/[folder-name]`
 
 ## Tech Stack
 
