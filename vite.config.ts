@@ -10,5 +10,5 @@ export default defineConfig({
     react(),
     tsconfigPaths(),
   ],
-  base: '/frontend-lab/',
+  base: '/frontend-essentials/',
 });
